@@ -25,6 +25,14 @@ mp2path = {
         'train_skill_path': './data/ASSIST17/train_skill.txt',
         'test_skill_path': './data/ASSIST17/test_skill.txt',
         'skill_max': None  # 将在运行时从数据计算
+    },
+    'xes3g5m': {
+        'ques_skill_path': './data/XES3G5M/ques_skill.csv',
+        'train_path': './data/XES3G5M/train_question.txt',
+        'test_path': './data/XES3G5M/test_question.txt',
+        'train_skill_path': './data/XES3G5M/train_skill.txt',
+        'test_skill_path': './data/XES3G5M/test_skill.txt',
+        'skill_max': None
     }
 }
 
