@@ -56,10 +56,10 @@ def main(dataset):
         if skill_max is None:
             # 从数据文件读取skill_max
             skill_data = pd.read_csv(mp2path[dataset]['ques_skill_path'])
-            skill_max = int(skill_data['skill_id'].max()) + 1
+            skill_max = int(skill_data['skill_id'].max()) + 2
 
         if 'ques_skill_path' in mp2path[dataset]:
-            pro_max = int(pd.read_csv(ques_skill_path)['problem_id'].max()) + 1
+            pro_max = int(pd.read_csv(ques_skill_path)['problem_id'].max()) + 2
         else:
             pro_max = skill_max
 
@@ -67,7 +67,7 @@ def main(dataset):
         d = 128
         learning_rate = 0.002
         epochs = 70
-        batch_size = 80
+        batch_size = 512
         min_seq = 3
         max_seq = 200
         grad_clip = 15.0
