@@ -1,0 +1,42 @@
+Result/
+Result/*
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Virtualenvs and env files
+venv/
+env/
+.env
+
+# Test / coverage
+.pytest_cache/
+
+# IDE / editor
+.vscode/
+.idea/
+
+# Data folders (ignore large raw datasets)
+ASSIST2009/
+ASSIST2015/
+ASSIST2012/
+ASSIST2017/
+XES3G5M/
+data/
+EdNet/
+result/
