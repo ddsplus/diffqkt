@@ -182,7 +182,7 @@ def main():
     主处理流程
     """
     csv_path = './ASSIST2017/anonymized_full_release_competition_dataset.csv'
-    output_dir = '../data/ASSIST17'
+    output_dir = './data/ASSIST17'
     
     # 加载数据
     df = load_and_process_data(csv_path)

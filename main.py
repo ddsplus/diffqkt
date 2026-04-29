@@ -11,19 +11,19 @@ from run import run_epoch
 
 mp2path = {
     'assist09': {
-        'ques_skill_path': '../data/ASSIST09/ques_skill.csv',
-        'train_path': '../data/ASSIST09/train_question.txt',
-        'test_path': '../data/ASSIST09/test_question.txt',
-        'train_skill_path': '../data/ASSIST09/train_skill.txt',
-        'test_skill_path': '../data/ASSIST09/test_skill.txt',
-        'skill_max': 149
+        'ques_skill_path': './data/ASSIST09/ques_skill.csv',
+        'train_path': './data/ASSIST09/train_question.txt',
+        'test_path': './data/ASSIST09/test_question.txt',
+        'train_skill_path': './data/ASSIST09/train_skill.txt',
+        'test_skill_path': './data/ASSIST09/test_skill.txt',
+        'skill_max': None
     },
     'assist17': {
-        'ques_skill_path': '../data/ASSIST17/ques_skill.csv',
-        'train_path': '../data/ASSIST17/train_question.txt',
-        'test_path': '../data/ASSIST17/test_question.txt',
-        'train_skill_path': '../data/ASSIST17/train_skill.txt',
-        'test_skill_path': '../data/ASSIST17/test_skill.txt',
+        'ques_skill_path': './data/ASSIST17/ques_skill.csv',
+        'train_path': './data/ASSIST17/train_question.txt',
+        'test_path': './data/ASSIST17/test_question.txt',
+        'train_skill_path': './data/ASSIST17/train_skill.txt',
+        'test_skill_path': './data/ASSIST17/test_skill.txt',
         'skill_max': None  # 将在运行时从数据计算
     }
 }
@@ -51,7 +51,7 @@ def main(dataset):
             skill_max = int(skill_data['skill_id'].max()) + 1
 
         if 'ques_skill_path' in mp2path[dataset]:
-            pro_max = 1 + max(pd.read_csv(ques_skill_path).values[:, 0])
+            pro_max = int(pd.read_csv(ques_skill_path)['problem_id'].max()) + 1
         else:
             pro_max = skill_max
 
