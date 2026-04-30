@@ -34,6 +34,14 @@ mp2path = {
         'train_skill_path': './data/XES3G5M/train_skill.txt',
         'test_skill_path': './data/XES3G5M/test_skill.txt',
         'skill_max': None
+    },
+    'statics2011': {
+        'ques_skill_path': './data/STATICS2011/ques_skill.csv',
+        'train_path': './data/STATICS2011/train_question.txt',
+        'test_path': './data/STATICS2011/test_question.txt',
+        'train_skill_path': './data/STATICS2011/train_skill.txt',
+        'test_skill_path': './data/STATICS2011/test_skill.txt',
+        'skill_max': None
     }
 }
 
