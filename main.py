@@ -5,6 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.data as data
 import argparse
+from datetime import datetime
 
 from model import DiffuQKT
 from run import run_epoch
@@ -40,7 +41,8 @@ def main(dataset):
     if dataset not in mp2path:
         raise ValueError(f"未知数据集: {dataset}，可选: {list(mp2path.keys())}")
 
-    with open(f'./result/{dataset}_output.txt', 'w') as file:
+    date_tag = datetime.now().strftime('%Y%m%d')
+    with open(f'./result/{dataset}_output_{date_tag}.txt', 'w') as file:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         if 'ques_skill_path' in mp2path[dataset]:
@@ -87,7 +89,8 @@ def main(dataset):
         for now_step in range(1):
             best_acc = 0
             best_auc = 0
-            state = {'auc': 0, 'acc': 0, 'loss': 0}
+            best_epoch = -1
+            state = {'auc': 0, 'acc': 0, 'loss': 0, 'best_epoch': -1}
 
             model = DiffuQKT(pro_max, skill_max, d, p, head, beta_start, beta_end, diff_num_step, lamda_1, lamda_2)
             model = model.to(device)
@@ -108,17 +111,26 @@ def main(dataset):
                 print(
                     f'epoch: {epoch}, train_loss: {train_loss:.4f}, train_acc: {train_acc:.4f}, train_auc: {train_auc:.4f}, test_auc: {test_auc:.4f}')
                 # 保存模型
-                torch.save(model.state_dict(), f"./result/DiffuQKT_{dataset}_{now_step}_model.pkl")
+                # Save latest model each epoch.
+                torch.save(model.state_dict(), f"./result/DiffuQKT_{dataset}_{now_step}_{date_tag}_last_model.pkl")
                 state['auc'] = test_auc
                 state['acc'] = test_acc
                 state['loss'] = test_loss
-                torch.save(state, f'./result/DiffuQKT_{dataset}_{now_step}_state.ckpt')
+                torch.save(state, f'./result/DiffuQKT_{dataset}_{now_step}_{date_tag}_state.ckpt')
                 sublist.append(test_auc)
                 # 早停机制（基于测试集AUC）
                 if test_auc > best_auc:
                     one_p = 0
                     best_auc = test_auc
                     best_acc = test_acc
+                    best_epoch = epoch
+                    # Save best-by-test-AUC model.
+                    torch.save(model.state_dict(), f"./result/DiffuQKT_{dataset}_{now_step}_{date_tag}_model.pkl")
+                    torch.save(model.state_dict(), f"./result/DiffuQKT_{dataset}_{now_step}_{date_tag}_best_model.pkl")
+                    state['best_epoch'] = best_epoch
+                    state['best_auc'] = best_auc
+                    state['best_acc'] = best_acc
+                    torch.save(state, f'./result/DiffuQKT_{dataset}_{now_step}_{date_tag}_state.ckpt')
                 else:
                     one_p += 1
                 if one_p >= patience:
