@@ -62,9 +62,11 @@ def load_and_process_data(csv_path: str) -> pd.DataFrame:
     df["correct"] = np.where(fa == "correct", 1, 0)
 
     # Extract a single skill from KC (F2011) for DiffuQKT mapping.
-    df["skill_text"] = df["KC (F2011)"].apply(
-        lambda x: split_skill_text(x)[0] if split_skill_text(x) else None
-    )
+    def first_skill(x: str):
+        skills = split_skill_text(x)
+        return skills[0] if skills else None
+
+    df["skill_text"] = df["KC (F2011)"].apply(first_skill)
 
     # Remove rows without a usable skill.
     before_rows = len(df)
@@ -77,7 +79,7 @@ def load_and_process_data(csv_path: str) -> pd.DataFrame:
     return df
 
 
-def create_id_mappings(df: pd.DataFrame) -> Tuple[Dict[str, int], Dict[str, int], pd.DataFrame]:
+def create_id_mappings(df: pd.DataFrame) -> Tuple[Dict[str, int], Dict[str, int], pd.DataFrame, pd.DataFrame]:
     print("\nCreating question/skill mappings...")
     unique_items = sorted(df["item_text"].unique())
     unique_skills = sorted(df["skill_text"].unique())
@@ -101,7 +103,7 @@ def create_id_mappings(df: pd.DataFrame) -> Tuple[Dict[str, int], Dict[str, int]
     print(f"Unique problems: {len(item_to_id)}")
     print(f"Unique skills: {len(skill_to_id)}")
     print(f"Q-S map rows: {len(ques_skill_map)}")
-    return item_to_id, skill_to_id, ques_skill_map
+    return item_to_id, skill_to_id, ques_skill_map, df
 
 
 def group_by_user(df: pd.DataFrame) -> Dict[str, pd.DataFrame]:
@@ -191,7 +193,7 @@ def main() -> None:
         return
 
     df = load_and_process_data(csv_path)
-    _, _, ques_skill_map = create_id_mappings(df)
+    _, _, ques_skill_map, df = create_id_mappings(df)
     user_groups = group_by_user(df)
     generate_dataset_files(user_groups, output_dir=output_dir)
     save_ques_skill_mapping(ques_skill_map, output_dir=output_dir)
