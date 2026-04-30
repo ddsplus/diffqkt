@@ -66,7 +66,7 @@ def main(dataset):
         p = 0.4
         d = 128
         learning_rate = 0.002
-        epochs = 70
+        epochs = 500
         batch_size = 512
         min_seq = 3
         max_seq = 200
