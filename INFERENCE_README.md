@@ -11,7 +11,11 @@
 ## 基本用法
 
 ```bash
-python inference.py --model_path <模型文件路径> --dataset <数据集名称> --noise_ratio <噪声强度>
+# 默认运行：输出噪声强度 0, 0.1, 0.2, 0.3, 0.4, 0.5 的结果
+python inference.py --model_path <模型文件路径> --dataset <数据集名称>
+
+# 自定义噪声强度
+python inference.py --model_path <模型文件路径> --dataset <数据集名称> --noise_ratios 0.0 0.1 0.2
 ```
 
 ## 参数说明
@@ -20,7 +24,7 @@ python inference.py --model_path <模型文件路径> --dataset <数据集名称
 |------|------|------|--------|------|
 | `--model_path` | str | ✓ | - | 模型权重文件路径（如：`./result/DiffuQKT_assist09_0_20250511_best_model.pkl`） |
 | `--dataset` | str | ✓ | - | 数据集名称，可选：`assist09`、`assist17`、`xes3g5m`、`statics2011` |
-| `--noise_ratio` | float | ✗ | 0.0 | 噪声强度，范围 0-1，表示随机翻转答案的百分比 |
+| `--noise_ratios` | float | ✗ | [0.0, 0.1, 0.2, 0.3, 0.4, 0.5] | 噪声强度列表，范围 0-1（默认输出 6 个结果） |
 | `--batch_size` | int | ✗ | 512 | 推理时的批量大小 |
 | `--max_seq` | int | ✗ | 200 | 最大序列长度 |
 | `--min_seq` | int | ✗ | 3 | 最小序列长度 |
@@ -28,62 +32,76 @@ python inference.py --model_path <模型文件路径> --dataset <数据集名称
 
 ## 使用示例
 
-### 例1：无噪声推理（基准）
+### 例1：默认运行（输出 6 个噪声强度的结果）
+```bash
+python inference.py \
+    --model_path ./result/DiffuQKT_assist09_0_20250511_best_model.pkl \
+    --dataset assist09
+```
+
+### 例2：自定义噪声强度列表
 ```bash
 python inference.py \
     --model_path ./result/DiffuQKT_assist09_0_20250511_best_model.pkl \
     --dataset assist09 \
-    --noise_ratio 0.0
+    --noise_ratios 0.0 0.05 0.1 0.15 0.2
 ```
 
-### 例2：添加 20% 的噪声
-```bash
-python inference.py \
-    --model_path ./result/DiffuQKT_assist09_0_20250511_best_model.pkl \
-    --dataset assist09 \
-    --noise_ratio 0.2
-```
-
-### 例3：在不同数据集上测试，添加 30% 噪声，使用 CPU
+### 例3：只测试单个噪声强度
 ```bash
 python inference.py \
     --model_path ./result/DiffuQKT_assist17_0_20250511_best_model.pkl \
     --dataset assist17 \
-    --noise_ratio 0.3 \
-    --device cpu
+    --noise_ratios 0.3
 ```
 
-### 例4：自定义批量大小和序列长度
+### 例4：在不同数据集上测试，使用 CPU
 ```bash
 python inference.py \
     --model_path ./result/DiffuQKT_xes3g5m_0_20250511_best_model.pkl \
     --dataset xes3g5m \
-    --noise_ratio 0.1 \
+    --device cpu
+```
+
+### 例5：自定义批量大小和序列长度
+```bash
+python inference.py \
+    --model_path ./result/DiffuQKT_statics2011_0_20250511_best_model.pkl \
+    --dataset statics2011 \
     --batch_size 256 \
     --max_seq 150
 ```
 
 ## 输出格式
 
-脚本执行完成后会输出：
+脚本执行完成后会输出表格格式的结果：
 
 ```
-==================================================
-推理完成！
-数据集: assist09
-噪声强度: 0.20%
-AUC: 0.7623
-ACC: 0.6842
-==================================================
+============================================================
+推理完成！数据集: assist09
+============================================================
+噪声强度      AUC        ACC       
+------------------------------------------------------------
+0.0%         0.7623     0.6842    
+10.0%        0.7512     0.6721    
+20.0%        0.7401     0.6598    
+30.0%        0.7289     0.6475    
+40.0%        0.7178     0.6352    
+50.0%        0.7066     0.6229    
+============================================================
 ```
+
+- **噪声强度**：应用的噪声比例
+- **AUC**：曲线下面积（范围 0-1，越高越好）
+- **ACC**：准确率（范围 0-1，越高越好）
 
 ## 噪声机制说明
 
-**噪声比例**: 在推理过程中，脚本会随机选择答案序列中的百分比个样本，并翻转其答案值（0 → 1，1 → 0），模拟学生的错误或不确定性。
+**噪声强度**: 在推理过程中，脚本会随机选择整个答案序列中百分比的位置，并直接翻转其答案值（0 ↔ 1），不区分答案是否为0，模拟学生的错误或不确定性。
 
 - `noise_ratio = 0.0`：无噪声，使用原始答案
-- `noise_ratio = 0.2`：20% 的答案会被随机翻转
-- `noise_ratio = 1.0`：100% 的答案都会被翻转
+- `noise_ratio = 0.2`：整个序列的 20% 位置会被随机翻转
+- `noise_ratio = 1.0`：整个序列的所有答案都会被翻转
 
 ## 关键特性
 
@@ -110,7 +128,27 @@ python inference.py --model_path ... --dataset ... --batch_size 256 --device cpu
 ### Q3: 模型文件不存在
 **A:** 检查模型路径是否正确，可以使用绝对路径或相对路径。
 
+### Q4: 如何只测试特定的噪声强度？
+**A:** 使用 `--noise_ratios` 参数指定：
+```bash
+# 只测试 0% 和 50% 噪声
+python inference.py --model_path ... --dataset ... --noise_ratios 0.0 0.5
+```
+
+### Q5: 脚本运行时间很长
+**A:** 这是正常的，因为脚本需要在多个噪声强度下进行推理。可以：
+- 减少噪声强度的数量
+- 增加 `batch_size`（如果 GPU 内存允许）
+- 减少 `max_seq` 长度
+
 ## 输出的指标解释
 
-- **AUC (Area Under Curve)**：ROC 曲线下的面积，范围 0-1，越高越好
+- **AUC (Area Under Curve)**：ROC 曲线下的面积，范围 0-1，越高越好，衡量模型的整体分类性能
 - **ACC (Accuracy)**：准确率，预测正确的样本占比，范围 0-1，越高越好
+
+## 性能分析
+
+通过观察不同噪声强度下的 AUC 和 ACC，可以评估模型的**鲁棒性**：
+- 如果结果随噪声增加而缓慢下降，说明模型较为鲁棒
+- 如果结果快速下降，说明模型对噪声敏感
+- 比较不同模型在相同噪声强度下的性能，可以找到更好的模型
